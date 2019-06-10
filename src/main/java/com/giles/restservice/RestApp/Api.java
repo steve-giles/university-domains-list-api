@@ -118,7 +118,7 @@ public class Api {
      * This method extracts nodes from a JSON object which contain a country
      *
      * @param filterText The text as JSON containing all universities
-     * @param filter The name of the university to find (contains)
+     * @param filter The country location of the university to find (contains)
      * @return The filtered text
      * @throws IOException Related to network and stream reading
      */
