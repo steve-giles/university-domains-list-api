@@ -27,10 +27,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.CollectionType;
 import org.springframework.cglib.core.CollectionUtils;
 import org.springframework.cglib.core.Predicate;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -52,13 +49,13 @@ import static org.springframework.web.bind.annotation.RequestMethod.GET;
 @RequestMapping("/")
 public class Api {
     /**
-     * This method performs a university search on https://raw.githubusercontent.com/Hipo/university-domains-list
+     * Performs a university search on https://raw.githubusercontent.com/Hipo/university-domains-list
      *
      * @param country The country to search
      * @param name The name to search
      * @return The contents of the search
      */
-    @RequestMapping(path = "/search", method = GET)
+    @GetMapping("/search")
     public String index(@RequestParam(value = "country", required=false) String country,
                         @RequestParam(value = "name", required=false) String name) {
         String response = "";
@@ -87,6 +84,30 @@ public class Api {
         }
 
         return response;
+    }
+
+    /**
+     * Create a university
+     *
+     * @param university The university to create
+     * @return The created university
+     */
+    @PostMapping("/university")
+    public University post(@RequestBody University university){
+        // not implemented
+        return null;
+    }
+
+    /**
+     * Update a university
+     *
+     * @param university The university to update
+     * @return The updated university
+     */
+    @PutMapping("/university")
+    public University put(@RequestBody University university){
+        // not implemented
+        return null;
     }
 
     /**
