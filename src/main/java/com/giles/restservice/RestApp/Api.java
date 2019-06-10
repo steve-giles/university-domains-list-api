@@ -23,8 +23,14 @@
  */
 package com.giles.restservice.RestApp;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.type.CollectionType;
+import com.jayway.jsonpath.JsonPath;
+import org.springframework.cglib.core.CollectionUtils;
+import org.springframework.cglib.core.Predicate;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
@@ -32,30 +38,106 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.List;
 import java.util.Scanner;
 
+import static org.springframework.web.bind.annotation.RequestMethod.GET;
+
+/**
+ * This class implements a RESTful web service to obtain university data
+ *
+ * @author Steve Giles
+ */
 @RestController
 @CrossOrigin
 @RequestMapping("/")
 public class Api {
-
-    @RequestMapping("/search")
-    public String index() {
+    /**
+     * This method performs a university search on https://raw.githubusercontent.com/Hipo/university-domains-list
+     *
+     * @param country The country to search
+     * @param name The name to search
+     * @return The contents of the search
+     */
+    @RequestMapping(path = "/search", method = GET)
+    public String index(@RequestParam(value = "country", required=false) String country,
+                        @RequestParam(value = "name", required=false) String name) {
         String response = "";
 
-        // todo - add search by name and country
-
         try {
-            URL url = new URL("https://raw.githubusercontent.com/Hipo/university-domains-list/master/world_universities_and_domains.json");
+            URL url = new URL("https://raw.githubusercontent.com/Hipo/university-domains-list/master/" +
+                    "world_universities_and_domains.json");
             try {
                 response = getResponseFromHttpUrl(url);
+
+                // filter by name
+                if (name != null) {
+                    response = getUniversitiesByName(response, name);
+                }
+
+                // filter by country
+                if (country != null) {
+                    response = getUniversitiesByCountry(response, country);
+                }
+
             } catch(IOException ie) {
                 ie.printStackTrace();
             }
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
+
         return response;
+    }
+
+    /**
+     * This method extracts nodes from a JSON object which contain a name
+     *
+     * @param filterText The text as JSON containing all universities
+     * @param filter The name of the university to find (contains)
+     * @return The filtered text
+     * @throws IOException Related to network and stream reading
+     */
+    private static String getUniversitiesByName(String filterText, String filter) throws IOException {
+
+        ObjectMapper mapper = new ObjectMapper();
+        CollectionType mapCollectionType = mapper.getTypeFactory()
+                .constructCollectionType(List.class, University.class);
+        List<University> universities = (List<University>) mapper.readValue(filterText, mapCollectionType);
+
+        CollectionUtils.filter(universities, new Predicate() {
+            @Override
+            public boolean evaluate(Object o) {
+                return ((University) o).getName().contains(filter);
+            }
+        });
+
+        return mapper.writeValueAsString(universities);
+    }
+
+    /**
+     * This method extracts nodes from a JSON object which contain a country
+     *
+     * @param filterText The text as JSON containing all universities
+     * @param filter The name of the university to find (contains)
+     * @return The filtered text
+     * @throws IOException Related to network and stream reading
+     */
+    private static String getUniversitiesByCountry(String filterText, String filter) throws IOException {
+
+        ObjectMapper mapper = new ObjectMapper();
+        CollectionType mapCollectionType = mapper.getTypeFactory()
+                .constructCollectionType(List.class, University.class);
+        List<University> universities = (List<University>) mapper.readValue(filterText, mapCollectionType);
+
+        CollectionUtils.filter(universities, new Predicate() {
+            @Override
+            public boolean evaluate(Object o) {
+                return ((University) o).getCountry().contains(filter);
+            }
+        });
+
+        return mapper.writeValueAsString(universities);
     }
 
     /**
@@ -66,7 +148,7 @@ public class Api {
      * @return The contents of the HTTP response.
      * @throws IOException Related to network and stream reading
      */
-    public static String getResponseFromHttpUrl(URL url) throws IOException {
+    private static String getResponseFromHttpUrl(URL url) throws IOException {
         HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
         urlConnection.setRequestProperty("Content-Type", "application/json");
 

@@ -8,15 +8,40 @@ University Domains and Names API in Java
 
 Provides a search endpoint you can search for an autocomplete for university name or/and filter by country.
 
+This is Java implementation of https://github.com/Hipo/university-domains-list-api
+
 ## API Search Endpoint
 
 ### Request
     /search?name=Middle
 
-Note: Search by name and country not yet implemented
 
 ### Response
     [
+    {
+    web_page: "http://www.aum.edu.kw/",
+    country: "Kuwait",
+    domain: "aum.edu.kw",
+    name: "American University of Middle East"
+    },    
+    {
+    web_page: "http://www.mxcc.commnet.edu",
+    country: "United States",
+    domain: "mxcc.commnet.edu",
+    name: "Middlesex Community College"
+    },   
+    {
+    web_page: "http://www.middlesex.mass.edu",
+    country: "United States",
+    domain: "amiddlesex.mass.edu",
+    name: "Middlesex Community College"
+    },   
+    {
+    web_page: "http://www.middlesexcc.edu",
+    country: "United States",
+    domain: "middlesexcc.edu",
+    name: "Middlesex County College"
+    },   
     {
     web_page: "http://www.meu.edu.jo/",
     country: "Jordan",
@@ -55,6 +80,7 @@ Note: Search by name and country not yet implemented
     }
     ]
 
+
 ### Request
     /search?name=Middle&country=Turkey
 
@@ -68,8 +94,7 @@ Note: Search by name and country not yet implemented
     name: "Middle East Technical University"
     }
     ]
-
-
+    
 ## Run the Project
 
 - Clone Project 
