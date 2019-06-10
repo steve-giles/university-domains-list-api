@@ -25,7 +25,6 @@ package com.giles.restservice.RestApp;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.CollectionType;
-import com.jayway.jsonpath.JsonPath;
 import org.springframework.cglib.core.CollectionUtils;
 import org.springframework.cglib.core.Predicate;
 import org.springframework.web.bind.annotation.CrossOrigin;
