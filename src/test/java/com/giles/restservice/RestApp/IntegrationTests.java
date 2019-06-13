@@ -29,7 +29,6 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -39,21 +38,15 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 
-import static org.mockito.Mockito.*;
-import static org.mockito.ArgumentMatchers.any;
-
 /**
- * Unit tests for {@link Api}
+ * Integration tests for {@link Api} where RESTful services calls are made to the backend to retrieve universities
  *
  * @author Steve Giles
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment= SpringBootTest.WebEnvironment.RANDOM_PORT)
-public class ApiTests {
+public class IntegrationTests {
     private static final ObjectMapper mapper = new ObjectMapper();
-
-    @MockBean
-    private Api mockApi;
 
     @LocalServerPort
     private int randomServerPort;
@@ -63,51 +56,32 @@ public class ApiTests {
     }
 
     @Test
-    public void testGetUniversitiesFindsNoMatches() {
-        RestTemplate restTemplate = new RestTemplate();
-        when(mockApi.index(any(), any())).thenReturn(null);
-
+    public void testGetAllUniversitiesWithNoNameOrCountry() {
         final String baseUrl = "http://localhost:" + randomServerPort + "/search";
-        try {
-            URI uri = new URI(baseUrl);
-
-            ResponseEntity<String> result = restTemplate.getForEntity(uri, String.class);
-
-            // verify request succeed
-            Assert.assertEquals(200, result.getStatusCodeValue());
-            Assert.assertEquals(null, result.getBody());
-        } catch (URISyntaxException e) {
-            Assert.fail(e.getMessage());
-        }
+        performSearch(baseUrl, 200, 9684, null);
     }
 
     @Test
     public void testGetUniversitiesByName() {
         final String baseUrl = "http://localhost:" + randomServerPort + "/search?name=Middle";
-
-        when(mockApi.index(any(), any())).thenReturn(TestConstants.NAME);
-
-        performMockSearch(baseUrl, 200, 10, TestConstants.NAME);
+        performSearch(baseUrl, 200, 10, TestConstants.NAME);
     }
 
     @Test
     public void testAllUSUniversitiesByNameAndCountry() {
         final String baseUrl = "http://localhost:" + randomServerPort + "/search?name=Middle&country=Turkey";
-
-        when(mockApi.index(any(), any())).thenReturn(TestConstants.NAME_AND_COUNTRY);
-
-        performMockSearch(baseUrl, 200, 1, TestConstants.NAME_AND_COUNTRY);
+        performSearch(baseUrl, 200, 1, TestConstants.NAME_AND_COUNTRY);
     }
 
     /**
-     * Performs a mock RESTful call to the backend to retrieve universities
+     * Performs a RESTful call to the backend to retrieve universities
      *
      * @param url The request uri
      * @param expectedStatusCode Expected status code
      * @param expectedSize Expected size
      * @param expectedMessageBody Expected message body
      */
-    private void performMockSearch(String url, long expectedStatusCode, long expectedSize,
+    private void performSearch(String url, long expectedStatusCode, long expectedSize,
                                String expectedMessageBody) {
         RestTemplate restTemplate = new RestTemplate();
 
@@ -116,13 +90,15 @@ public class ApiTests {
 
             ResponseEntity<String> result = restTemplate.getForEntity(uri, String.class);
 
-            // verify request succeed
+            //Verify request succeed
             Assert.assertEquals(expectedStatusCode, result.getStatusCodeValue());
 
             try {
                 JsonNode root = mapper.readTree(result.getBody());
                 Assert.assertEquals(    expectedSize, root.size());
-                Assert.assertEquals(expectedMessageBody, result.getBody());
+                if (expectedMessageBody != null) {
+                    Assert.assertEquals(expectedMessageBody, result.getBody());
+                }
             } catch(IOException ie) {
                 Assert.fail(ie.getMessage());
             }

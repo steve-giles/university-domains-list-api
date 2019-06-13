@@ -37,8 +37,6 @@ import java.net.URL;
 import java.util.List;
 import java.util.Scanner;
 
-import static org.springframework.web.bind.annotation.RequestMethod.GET;
-
 /**
  * This class implements a RESTful web service to obtain university data
  *
